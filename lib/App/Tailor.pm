@@ -51,7 +51,7 @@ Accepts a regex which, when matched, will cause a line of input to be ignored.
   ignore qr/foo/;       # ignore any line containing 'foo'
   ignore qr/foo(?=bar)  # ignore any line containing 'foo' followed by 'bar'
 
-Ignored rules are applied to each line of input B<first>.
+Ignored rules are applied to each line of input B<FIRST>.
 
 =head2 modify
 
