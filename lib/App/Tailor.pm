@@ -223,14 +223,16 @@ sub apply_rule {
   elsif ($type == MODIFY) {
     my ($regex, $replace) = @rule;
 
-    if (ref $replace eq 'CODE') {
-      $line =~ s/$regex/
-        local $_ = $line;
-        $replace->($line);
-      /xe;
-    }
-    else {
-      $line =~ s/$regex/$replace/;
+    if ($line =~ /$regex/) {
+      if (ref $replace eq 'CODE') {
+        $line =~ s/$regex/
+          local $_ = $line;
+          $replace->($line);
+        /xe;
+      }
+      else {
+        eval "\$line =~ s/$regex/$replace/";
+      }
     }
   }
   elsif ($type == COLORIZE) {
