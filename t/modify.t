@@ -6,7 +6,7 @@ my $str = '';
 open my $in,  '<', \$str or die $!;
 open my $out, '>', \$str or die $!;
 
-subtest basics => sub{
+subtest 'positive path' => sub{
   reset_rules;
 
   modify qr/foo/    => sub{ uc $_ };
@@ -28,8 +28,9 @@ subtest basics => sub{
 subtest 'captures with string replacement' => sub{
   reset_rules;
 
-  modify qr/^(a) (b)/ => '[$1] [$2]';
+  modify qr/^(a) (b)/         => '[$1] [$2]';
   modify qr/^(?<c>c) (?<d>d)/ => '<$+{c}> <$+{d}>';
+  modify qr/^(.+?) (\{.*)/    => 'label=$1 json=$2';
 
   my $iter = itail $in;
 
@@ -38,13 +39,17 @@ subtest 'captures with string replacement' => sub{
 
   print $out "c d\n";
   is $iter->(), "<c> <d>\n", 'named captures';
+
+  print $out "asdf {\"json\": true}\n";
+  is $iter->(), "label=asdf json={\"json\": true}\n", 'greedy and non-greedy captures';
 };
 
 subtest 'captures with sub{} replacement' => sub{
   reset_rules;
 
-  modify qr/^(a) (b)/ => sub{ "[$1] [$2]" };
+  modify qr/^(a) (b)/         => sub{ "[$1] [$2]" };
   modify qr/^(?<c>c) (?<d>d)/ => sub{ "<$+{c}> <$+{d}>" };
+  modify qr/^(.+?) (\{.*)/    => sub{ "label=$1 json=$2" };
 
   my $iter = itail $in;
 
@@ -53,6 +58,9 @@ subtest 'captures with sub{} replacement' => sub{
 
   print $out "c d\n";
   is $iter->(), "<c> <d>\n", 'named captures';
+
+  print $out "asdf {\"json\": true}\n";
+  is $iter->(), "label=asdf json={\"json\": true}\n", 'greedy and non-greedy captures';
 };
 
 done_testing;
