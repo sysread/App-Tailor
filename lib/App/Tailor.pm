@@ -13,7 +13,7 @@ package App::Tailor;
   ignore qr/\/ping/;
 
   # parse JSON-encoded lines
-  modify qr/^{/ => sub{
+  modify qr/^{.*/ => sub{
     my $data = decode_json $_;
     my $msg  = $data->{message};
     my $ts   = $data->{timestamp};
@@ -67,6 +67,26 @@ were defined.
 
   modify qr/foo/ => sub{ uc $_ };   # foo => FOO
   modify qr/FOO/ => 'FOOL';         # FOO => 'FOOL';
+
+Indexed and named captures may be modified using the normal patterns, with the
+caveat that care must be taken to ensure that a replacement string is not
+interpolated as part of the definition. The rule will do a string eval on the
+modifier regex and modifier string so that the following will work:
+
+  # capture groups
+  modify qr/(a) (b)/ => sub{ "$1 -> $2" };
+  # interpolation is   ______^________^
+  # ok in a subroutine
+
+  modify qr/(a) (b)/ => '$1 -> $2'; 
+  # but not when the ___^________^
+  # replacement is a
+  # string
+
+  # named captures
+  modify qr/(?<first>a) (?<second>b)/ => sub{
+    return $+{first} . ' -> ' . $+{second};
+  };
 
 Modifier rules are applied to each line of input B<SECOND>.
 

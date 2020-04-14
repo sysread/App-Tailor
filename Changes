@@ -1,4 +1,5 @@
 {{$NEXT}}
+-Clearer explanation of modify() and captures
 
 0.02 2020-04-14
 -Handle back-references and named captures in string-replacements to modify()
